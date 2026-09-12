@@ -832,7 +832,7 @@ void lcPreferencesDialog::NewCategoryClicked()
 	lcLibraryCategory Category;
 
 	lcCategoryDialog Dialog(this, &Category);
-	if (dialog.exec() != QDialog::Accepted)
+	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
 	mOptions->CategoriesModified = true;
