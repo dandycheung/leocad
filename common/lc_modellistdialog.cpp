@@ -187,7 +187,7 @@ void lcModelListDialog::ExportModelClicked()
 		QMessageBox::information(this, tr("Export Submodel"), tr("No submodel selected."));
 		return;
 	}
-	
+
 	if (SelectedItems.size() == 1)
 	{
 		QListWidgetItem* CurrentItem = SelectedItems[0];
@@ -210,9 +210,9 @@ void lcModelListDialog::ExportModelClicked()
 
 		if (SaveFileName.isEmpty())
 			return;
-		
+
 		lcResult<void> ExportResult = lcGetActiveProject()->ExportModel(SaveFileName, Model);
-		
+
 		if (!ExportResult && !ExportResult.error().isEmpty())
 			QMessageBox::information(this, tr("Export Submodel"), ExportResult.error());
 
@@ -233,7 +233,7 @@ void lcModelListDialog::ExportModelClicked()
 			{
 				QString SaveFileName = QFileInfo(QDir(Folder), CurrentItem->text()).absoluteFilePath();
 				lcResult<void> ExportResult = lcGetActiveProject()->ExportModel(SaveFileName, Model);
-				
+
 				if (!ExportResult && !ExportResult.error().isEmpty())
 				{
 					QMessageBox::information(this, tr("Export Submodel"), ExportResult.error());

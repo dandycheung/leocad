@@ -316,8 +316,8 @@ lcPreferencesDialog::~lcPreferencesDialog()
 
 void lcPreferencesDialog::accept()
 {
-	int gridLineSpacing = ui->gridLineSpacing->text().toInt();
-	if (gridLineSpacing < 1)
+	int GridLineSpacing = ui->gridLineSpacing->text().toInt();
+	if (GridLineSpacing < 1)
 	{
 		QMessageBox::information(this, "LeoCAD", tr("Grid spacing must be greater than 0."));
 		return;
@@ -362,7 +362,7 @@ void lcPreferencesDialog::accept()
 
 	mOptions->Preferences.mDrawGridStuds = ui->gridStuds->isChecked();
 	mOptions->Preferences.mDrawGridLines = ui->gridLines->isChecked();
-	mOptions->Preferences.mGridLineSpacing = gridLineSpacing;
+	mOptions->Preferences.mGridLineSpacing = GridLineSpacing;
 	mOptions->Preferences.mDrawGridOrigin = ui->GridOriginCheckBox->isChecked();
 
 	mOptions->Preferences.mBackgroundGradient = ui->BackgroundGradientRadio->isChecked();
@@ -410,18 +410,18 @@ void lcPreferencesDialog::accept()
 
 void lcPreferencesDialog::PartsLibraryBrowseClicked()
 {
-	QString result = QFileDialog::getExistingDirectory(this, tr("Select Parts Library Folder"), ui->partsLibrary->text());
+	QString Result = QFileDialog::getExistingDirectory(this, tr("Select Parts Library Folder"), ui->partsLibrary->text());
 
-	if (!result.isEmpty())
-		ui->partsLibrary->setText(QDir::toNativeSeparators(result));
+	if (!Result.isEmpty())
+		ui->partsLibrary->setText(QDir::toNativeSeparators(Result));
 }
 
 void lcPreferencesDialog::PartsArchiveBrowseClicked()
 {
-	QString result = QFileDialog::getOpenFileName(this, tr("Select Parts Library Archive"), ui->partsLibrary->text(), tr("Supported Archives (*.zip *.bin);;All Files (*.*)"));
+	QString Result = QFileDialog::getOpenFileName(this, tr("Select Parts Library Archive"), ui->partsLibrary->text(), tr("Supported Archives (*.zip *.bin);;All Files (*.*)"));
 
-	if (!result.isEmpty())
-		ui->partsLibrary->setText(QDir::toNativeSeparators(result));
+	if (!Result.isEmpty())
+		ui->partsLibrary->setText(QDir::toNativeSeparators(Result));
 }
 
 void lcPreferencesDialog::BlenderAddonSettingsButtonClicked()
@@ -463,18 +463,18 @@ void lcPreferencesDialog::PovrayExecutableBrowseClicked()
 	QString filter(tr("All Files (*.*)"));
 #endif
 
-	QString result = QFileDialog::getOpenFileName(this, tr("Select POV-Ray Executable"), ui->povrayExecutable->text(), filter);
+	QString Result = QFileDialog::getOpenFileName(this, tr("Select POV-Ray Executable"), ui->povrayExecutable->text(), filter);
 
-	if (!result.isEmpty())
-		ui->povrayExecutable->setText(QDir::toNativeSeparators(result));
+	if (!Result.isEmpty())
+		ui->povrayExecutable->setText(QDir::toNativeSeparators(Result));
 }
 
 void lcPreferencesDialog::LgeoPathBrowseClicked()
 {
-	QString result = QFileDialog::getExistingDirectory(this, tr("Open LGEO Folder"), ui->lgeoPath->text());
+	QString Result = QFileDialog::getExistingDirectory(this, tr("Open LGEO Folder"), ui->lgeoPath->text());
 
-	if (!result.isEmpty())
-		ui->lgeoPath->setText(QDir::toNativeSeparators(result));
+	if (!Result.isEmpty())
+		ui->lgeoPath->setText(QDir::toNativeSeparators(Result));
 }
 
 void lcPreferencesDialog::ColorThemeCurrentIndexChanged(int Index)
@@ -616,18 +616,18 @@ void lcPreferencesDialog::ColorButtonClicked()
 	else
 		return;
 
-	QColor oldColor = QColor(LC_RGBA_RED(*Color), LC_RGBA_GREEN(*Color), LC_RGBA_BLUE(*Color), LC_RGBA_ALPHA(*Color));
-	QColor newColor = QColorDialog::getColor(oldColor, this, Title, DialogOptions);
+	QColor OldColor = QColor(LC_RGBA_RED(*Color), LC_RGBA_GREEN(*Color), LC_RGBA_BLUE(*Color), LC_RGBA_ALPHA(*Color));
+	QColor NewColor = QColorDialog::getColor(OldColor, this, Title, DialogOptions);
 
-	if (newColor == oldColor || !newColor.isValid())
+	if (NewColor == OldColor || !NewColor.isValid())
 		return;
 
-	*Color = LC_RGBA(newColor.red(), newColor.green(), newColor.blue(), newColor.alpha());
+	*Color = LC_RGBA(NewColor.red(), NewColor.green(), NewColor.blue(), NewColor.alpha());
 
 	QPixmap pix(12, 12);
 
-	newColor.setAlpha(255);
-	pix.fill(newColor);
+	NewColor.setAlpha(255);
+	pix.fill(NewColor);
 	((QToolButton*)Button)->setIcon(pix);
 }
 
@@ -700,9 +700,9 @@ void lcPreferencesDialog::AutomateEdgeColorToggled()
 	ui->AutomateEdgeColorButton->setEnabled(ui->AutomateEdgeColor->isChecked());
 }
 
-void lcPreferencesDialog::StudStyleComboCurrentIndexChanged(int index)
+void lcPreferencesDialog::StudStyleComboCurrentIndexChanged(int Index)
 {
-	ui->HighContrastButton->setEnabled(lcIsHighContrast(static_cast<lcStudStyle>(index)));
+	ui->HighContrastButton->setEnabled(lcIsHighContrast(static_cast<lcStudStyle>(Index)));
 }
 
 void lcPreferencesDialog::AutomateEdgeColor()
@@ -728,7 +728,7 @@ void lcPreferencesDialog::UpdateCategories()
 {
 	QTreeWidgetItem* CategoryItem;
 	QTreeWidget* CategoriesTree = ui->categoriesTree;
-	
+
 	disconnect(ui->categoriesTree->model(), &QAbstractItemModel::rowsInserted, this, &lcPreferencesDialog::CategoriesDropped);
 
 	CategoriesTree->clear();
@@ -743,7 +743,7 @@ void lcPreferencesDialog::UpdateCategories()
 	CategoryItem = new QTreeWidgetItem(CategoriesTree, QStringList(tr("Unassigned")));
 	CategoryItem->setData(0, CategoryRole, QVariant(-1));
 	CategoryItem->setFlags(CategoryItem->flags() & ~Qt::ItemFlag::ItemIsDropEnabled);
-	
+
 	connect(ui->categoriesTree->model(), &QAbstractItemModel::rowsInserted, this, &lcPreferencesDialog::CategoriesDropped);
 }
 
@@ -829,15 +829,15 @@ void lcPreferencesDialog::CategoriesDropped(const QModelIndex& Parent, int First
 
 void lcPreferencesDialog::NewCategoryClicked()
 {
-	lcLibraryCategory category;
+	lcLibraryCategory Category;
 
-	lcCategoryDialog dialog(this, &category);
+	lcCategoryDialog Dialog(this, &Category);
 	if (dialog.exec() != QDialog::Accepted)
 		return;
 
 	mOptions->CategoriesModified = true;
 	mOptions->CategoriesDefault = false;
-	mOptions->Categories.emplace_back(std::move(category));
+	mOptions->Categories.emplace_back(std::move(Category));
 
 	UpdateCategories();
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(static_cast<int>(mOptions->Categories.size()) - 1));
@@ -857,7 +857,7 @@ void lcPreferencesDialog::EditCategoryClicked()
 		return;
 
 	lcCategoryDialog Dialog(this, &mOptions->Categories[CategoryIndex]);
-	
+
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
@@ -947,13 +947,13 @@ bool lcPreferencesDialog::eventFilter(QObject* Object, QEvent* Event)
 		QKeyEvent* KeyEvent = static_cast<QKeyEvent*>(Event);
 
 		int NextKey = KeyEvent->key();
-		
+
 		if (NextKey == Qt::Key_Control || NextKey == Qt::Key_Shift || NextKey == Qt::Key_Meta || NextKey == Qt::Key_Alt)
 			return true;
 
 		Qt::KeyboardModifiers State = KeyEvent->modifiers();
 		QString Text = QKeySequence(NextKey).toString();
-		
+
 		if ((State & Qt::ShiftModifier) && (Text.isEmpty() || !Text.at(0).isPrint() || Text.at(0).isLetter() || Text.at(0).isSpace()))
 			NextKey |= Qt::SHIFT;
 		if (State & Qt::ControlModifier)
@@ -1072,8 +1072,8 @@ void lcPreferencesDialog::CommandChanged(QTreeWidgetItem* Current)
 	ui->shortcutGroup->setEnabled(true);
 
 	int ShortcutIndex = qvariant_cast<int>(Current->data(0, Qt::UserRole));
-	QKeySequence key(mOptions->KeyboardShortcuts.mShortcuts[ShortcutIndex]);
-	ui->shortcutEdit->setText(key.toString(QKeySequence::NativeText));
+	QKeySequence Key(mOptions->KeyboardShortcuts.mShortcuts[ShortcutIndex]);
+	ui->shortcutEdit->setText(Key.toString(QKeySequence::NativeText));
 }
 
 void lcPreferencesDialog::KeyboardFilterEditTextEdited(const QString& Text)
@@ -1129,7 +1129,7 @@ void lcPreferencesDialog::ShortcutAssignClicked()
 		for (uint ExistingIndex = 0; ExistingIndex < LC_ARRAY_COUNT(Shortcuts); ExistingIndex++)
 		{
 			QKeySequence Sequence(Shortcuts[ExistingIndex]);
-			
+
 			if (NewShortcut == Sequence.toString(QKeySequence::NativeText) && ExistingIndex != ShortcutIndex)
 			{
 				QString ActionText = qApp->translate("Menu", gCommands[ExistingIndex].MenuName).remove('&').remove(QLatin1String("..."));

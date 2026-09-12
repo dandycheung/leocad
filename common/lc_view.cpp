@@ -871,10 +871,10 @@ void lcView::OnDraw()
 
 	mScene->SetActiveSubmodelInstance(mActiveSubmodelInstance, mActiveSubmodelTransform);
 	mScene->SetDrawInterface(DrawInterface);
-	
+
 	bool DrawInsertPreview = DrawInterface && std::any_of(mViews.begin(), mViews.end(), [](lcView* View){ return View->mTrackTool == lcTrackTool::Insert; });
 	mScene->SetDrawInsertPreview(DrawInsertPreview);
-	
+
 	mModel->GetScene(mScene.get(), mCamera, Preferences.mHighlightNewParts, Preferences.mFadeSteps);
 
 	if (DrawInterface)
@@ -2364,16 +2364,16 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 			{
 				lcVector3 OverlayCenter;
 				lcMatrix33 RelativeRotation;
-			    
+
 			    ActiveModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation);
 
 				lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
-			    
+
 			    if (ActiveModel != mModel)
 					WorldMatrix = lcMul(WorldMatrix, mActiveSubmodelTransform);
 
 				const lcVector3 ScreenCenter = ProjectPoint(WorldMatrix.GetTranslation());
-			    
+
 			    mCameraRotationMouseAngle = atan2f((float)mMouseY - ScreenCenter[1], (float)mMouseX - ScreenCenter[0]);
 				mCameraRotationLastMouseAngle = mCameraRotationMouseAngle;
 			}

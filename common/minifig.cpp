@@ -45,7 +45,7 @@ MinifigWizard::MinifigWizard()
 		Template.ColorCodes[PartIndex] = ColorCodes[PartIndex];
 		Template.Angles[PartIndex] = 0.0f;
 	}
-	
+
 	for (int PartIndex = 0; PartIndex < LC_MFW_NUMITEMS; PartIndex++)
 	{
 		mMinifig.Parts[PartIndex] = nullptr;

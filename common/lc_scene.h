@@ -62,7 +62,7 @@ public:
 	{
 		mDrawInsertPreview = DrawInsertPreview;
 	}
-	
+
 	bool GetDrawInsertPreview() const
 	{
 		return mDrawInsertPreview;

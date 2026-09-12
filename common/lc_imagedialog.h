@@ -13,7 +13,7 @@ class lcImageDialog : public QDialog
 public:
 	lcImageDialog(QWidget* Parent, lcImageDialogOptions* Options);
 	virtual ~lcImageDialog();
-	
+
 public slots:
 	void accept() override;
 

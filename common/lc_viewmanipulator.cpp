@@ -720,7 +720,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		for (i = 0; i <= SegmentCount; i++)
 		{
 			const float VertexAngle = StartVectorAngle + (CameraDisc ? -1.0f : 1.0f) * SignedRotationAngle * i / SegmentCount;
-			
+
 			float x = cosf(VertexAngle * LC_DTOR) * Radius * OverlayScale;
 			float y = sinf(VertexAngle * LC_DTOR) * Radius * OverlayScale;
 
@@ -865,10 +865,10 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		constexpr int SegmentCount = 32;
 		lcVector3 Verts[SegmentCount * 6];
 		int NumVerts = 0;
-		
+
 		lcVector3 FrontVector(lcNormalize(Camera->mTargetPosition - Camera->mPosition));
 		FrontVector = lcMul(FrontVector, lcMatrix33AffineInverse(lcMatrix33(WorldMatrix)));
-		
+
 		for (int SegmentIndex = 0; SegmentIndex < SegmentCount; SegmentIndex++)
 		{
 			lcVector3 v1, v2, t1, t2;
@@ -964,7 +964,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		Context->SetWorldMatrix(RotatedWorldMatrix);
 
 		Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
-		
+
 		// Draw text.
 		lcVector3 ScreenPos = mView->ProjectPoint(WorldMatrix.GetTranslation());
 

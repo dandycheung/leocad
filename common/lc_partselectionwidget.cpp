@@ -1403,7 +1403,7 @@ void lcPartSelectionWidget::OpenSubmodel()
 
 	if (!Info || !Info->IsModel())
 		return;
-	
+
 	lcModel* Model = Info->GetModel();
 
 	lcGetActiveProject()->SetActiveModel(Model, true);

@@ -125,6 +125,6 @@ lcResult<void> lcExportBrickLink(const QString& SaveFileName, const lcPartsList&
 	}
 
 	BrickLinkFile.WriteLine("</INVENTORY>\n");
-	
+
 	return lcResult<void>();
 }

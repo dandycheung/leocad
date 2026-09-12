@@ -21,12 +21,12 @@ public:
 	{
 		return mError;
 	}
-	
+
 	QString& error()
 	{
 		return mError;
 	}
-	
+
 protected:
 	QString mError;
 };
@@ -77,10 +77,10 @@ public:
 	{
 		if (!has_value())
 			throw std::logic_error("bad lcResult access");
-		
+
 		return std::get<0>(mStorage);
 	}
-	
+
 	constexpr const QString& error() const
 	{
 		if (mStorage.index() != 1)

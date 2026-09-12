@@ -98,13 +98,13 @@ bool lcViewWidget::event(QEvent* Event)
 		case Qt::ZoomNativeGesture:
 			mView->Zoom(GestureEvent->value() * 100.0f);
 			break;
-			
+
 		case Qt::SmartZoomNativeGesture:
 			mView->ZoomExtents();
 			break;
 
 		default:
-			break;		
+			break;
 		}
 	}
 

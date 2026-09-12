@@ -25,8 +25,8 @@ class lcRenderProcess : public QProcess
 	Q_OBJECT
 
 public:
-	explicit lcRenderProcess(QObject* parent)
-		: QProcess(parent)
+	explicit lcRenderProcess(QObject* Parent)
+		: QProcess(Parent)
 	{
 	}
 	~lcRenderProcess();

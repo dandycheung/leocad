@@ -70,7 +70,7 @@ private slots:
 	void AutomateEdgeColor();
 	void AutomateEdgeColorToggled();
 	void BlenderAddonSettingsButtonClicked();
-	void StudStyleComboCurrentIndexChanged(int index);
+	void StudStyleComboCurrentIndexChanged(int Index);
 	void AntiAliasingToggled();
 	void EdgeLinesToggled();
 	void ConditionalLinesCheckBoxToggled();

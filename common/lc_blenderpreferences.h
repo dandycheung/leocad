@@ -14,7 +14,7 @@ class lcBlenderPreferences;
 class lcBlenderPreferencesDialog : public QDialog
 {
 	Q_OBJECT
-	
+
 public:
 	explicit lcBlenderPreferencesDialog(int Width, int Height, double Scale, QWidget* Parent = nullptr);
 	virtual ~lcBlenderPreferencesDialog();

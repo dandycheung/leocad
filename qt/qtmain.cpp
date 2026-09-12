@@ -26,45 +26,45 @@
 
 static TCHAR gMinidumpPath[_MAX_PATH];
 
-static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
+static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS ExceptionPointers)
 {
 	if (IsDebuggerPresent())
 		return EXCEPTION_CONTINUE_SEARCH;
 
-	HMODULE dbgHelp = LoadLibrary(TEXT("dbghelp.dll"));
+	HMODULE DbgHelp = LoadLibrary(TEXT("dbghelp.dll"));
 
-	if (dbgHelp == nullptr)
+	if (DbgHelp == nullptr)
 		return EXCEPTION_EXECUTE_HANDLER;
 
-	HANDLE file = CreateFile(gMinidumpPath, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+	HANDLE File = CreateFile(gMinidumpPath, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 
-	if (file == INVALID_HANDLE_VALUE)
+	if (File == INVALID_HANDLE_VALUE)
 		return EXCEPTION_EXECUTE_HANDLER;
 
 	typedef BOOL (WINAPI *LPMINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD ProcessId, HANDLE hFile, MINIDUMP_TYPE DumpType, CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, CONST PMINIDUMP_USER_STREAM_INFORMATION UserEncoderParam, CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
-	LPMINIDUMPWRITEDUMP miniDumpWriteDump = (LPMINIDUMPWRITEDUMP)GetProcAddress(dbgHelp, "MiniDumpWriteDump");
-	if (!miniDumpWriteDump)
+	LPMINIDUMPWRITEDUMP MiniDumpWriteDump = (LPMINIDUMPWRITEDUMP)GetProcAddress(DbgHelp, "MiniDumpWriteDump");
+	if (!MiniDumpWriteDump)
 		return EXCEPTION_EXECUTE_HANDLER;
 
-	MINIDUMP_EXCEPTION_INFORMATION mei;
+	MINIDUMP_EXCEPTION_INFORMATION Mei;
 
-	mei.ThreadId = GetCurrentThreadId();
-	mei.ExceptionPointers = exceptionPointers;
-	mei.ClientPointers = TRUE;
+	Mei.ThreadId = GetCurrentThreadId();
+	Mei.ExceptionPointers = ExceptionPointers;
+	Mei.ClientPointers = TRUE;
 
-	BOOL writeDump = miniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), file, MiniDumpNormal, exceptionPointers ? &mei : nullptr, nullptr, nullptr);
+	BOOL WriteDump = MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), File, MiniDumpNormal, ExceptionPointers ? &Mei : nullptr, nullptr, nullptr);
 
-	CloseHandle(file);
-	FreeLibrary(dbgHelp);
+	CloseHandle(File);
+	FreeLibrary(DbgHelp);
 
-	if (writeDump)
+	if (WriteDump)
 	{
-		TCHAR message[_MAX_PATH + 256];
-		lstrcpy(message, TEXT("LeoCAD just crashed. Crash information was saved to the file '"));
-		lstrcat(message, gMinidumpPath);
-		lstrcat(message, TEXT("', please send it to the developers for debugging."));
+		TCHAR Message[_MAX_PATH + 256];
+		lstrcpy(Message, TEXT("LeoCAD just crashed. Crash information was saved to the file '"));
+		lstrcat(Message, gMinidumpPath);
+		lstrcat(Message, TEXT("', please send it to the developers for debugging."));
 
-		MessageBox(nullptr, message, TEXT("LeoCAD"), MB_OK);
+		MessageBox(nullptr, Message, TEXT("LeoCAD"), MB_OK);
 	}
 
 	return EXCEPTION_EXECUTE_HANDLER;
@@ -80,43 +80,43 @@ static void lcSehInit()
 
 static void lcRegisterShellFileTypes()
 {
-	TCHAR modulePath[_MAX_PATH], longModulePath[_MAX_PATH];
-	TCHAR temp[2*_MAX_PATH];
+	TCHAR ModulePath[_MAX_PATH], LongModulePath[_MAX_PATH];
+	TCHAR Temp[2*_MAX_PATH];
 
-	GetModuleFileName(nullptr, longModulePath, _MAX_PATH);
-	if (GetShortPathName(longModulePath, modulePath, _MAX_PATH) == 0)
+	GetModuleFileName(nullptr, LongModulePath, _MAX_PATH);
+	if (GetShortPathName(LongModulePath, ModulePath, _MAX_PATH) == 0)
 		lstrcpy(modulePath, longModulePath);
 
 	if (RegSetValue(HKEY_CLASSES_ROOT, TEXT("LeoCAD.Project"), REG_SZ, TEXT("LeoCAD Project"), lstrlen(TEXT("LeoCAD Project")) * sizeof(TCHAR)) != ERROR_SUCCESS)
 		return;
 
-	lstrcpy(temp, modulePath);
-	lstrcat(temp, TEXT(",0"));
-	if (RegSetValue(HKEY_CLASSES_ROOT, TEXT("LeoCAD.Project\\DefaultIcon"), REG_SZ, temp, lstrlen(temp) * sizeof(TCHAR)) != ERROR_SUCCESS)
+	lstrcpy(Temp, ModulePath);
+	lstrcat(Temp, TEXT(",0"));
+	if (RegSetValue(HKEY_CLASSES_ROOT, TEXT("LeoCAD.Project\\DefaultIcon"), REG_SZ, Temp, lstrlen(Temp) * sizeof(TCHAR)) != ERROR_SUCCESS)
 		return;
 
-	lstrcpy(temp, modulePath);
-	lstrcat(temp, TEXT(" \"%1\""));
-	if (RegSetValue(HKEY_CLASSES_ROOT, TEXT("LeoCAD.Project\\shell\\open\\command"), REG_SZ, temp, lstrlen(temp) * sizeof(TCHAR)) != ERROR_SUCCESS)
+	lstrcpy(Temp, ModulePath);
+	lstrcat(Temp, TEXT(" \"%1\""));
+	if (RegSetValue(HKEY_CLASSES_ROOT, TEXT("LeoCAD.Project\\shell\\open\\command"), REG_SZ, Temp, lstrlen(Temp) * sizeof(TCHAR)) != ERROR_SUCCESS)
 		return;
 
-	LONG size = 2 * _MAX_PATH;
-	LONG result = RegQueryValue(HKEY_CLASSES_ROOT, TEXT(".lcd"), temp, &size);
+	LONG Size = 2 * _MAX_PATH;
+	LONG Result = RegQueryValue(HKEY_CLASSES_ROOT, TEXT(".lcd"), Temp, &Size);
 
-	if (result != ERROR_SUCCESS || !lstrlen(temp) || lstrcmp(temp, TEXT("LeoCAD.Project")))
+	if (Result != ERROR_SUCCESS || !lstrlen(Temp) || lstrcmp(Temp, TEXT("LeoCAD.Project")))
 	{
 		if (RegSetValue(HKEY_CLASSES_ROOT, TEXT(".lcd"), REG_SZ, TEXT("LeoCAD.Project"), lstrlen(TEXT("LeoCAD.Project")) * sizeof(TCHAR)) != ERROR_SUCCESS)
 			return;
 
-		HKEY key;
-		DWORD disposition = 0;
+		HKEY Key;
+		DWORD Disposition = 0;
 
-		if (RegCreateKeyEx(HKEY_CLASSES_ROOT, TEXT(".lcd\\ShellNew"), 0, REG_NONE, REG_OPTION_NON_VOLATILE, KEY_WRITE | KEY_READ, nullptr, &key, &disposition) != ERROR_SUCCESS)
+		if (RegCreateKeyEx(HKEY_CLASSES_ROOT, TEXT(".lcd\\ShellNew"), 0, REG_NONE, REG_OPTION_NON_VOLATILE, KEY_WRITE | KEY_READ, nullptr, &Key, &Disposition) != ERROR_SUCCESS)
 			return;
 
-		result = RegSetValueEx(key, TEXT("NullFile"), 0, REG_SZ, (CONST BYTE*)TEXT(""), (lstrlen(TEXT("")) + 1) * sizeof(TCHAR));
+		Result = RegSetValueEx(Key, TEXT("NullFile"), 0, REG_SZ, (CONST BYTE*)TEXT(""), (lstrlen(TEXT("")) + 1) * sizeof(TCHAR));
 
-		if (RegCloseKey(key) != ERROR_SUCCESS || result != ERROR_SUCCESS)
+		if (RegCloseKey(Key) != ERROR_SUCCESS || Result != ERROR_SUCCESS)
 			return;
 	}
 }

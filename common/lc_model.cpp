@@ -1352,7 +1352,7 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 			if (Light->IsVisible())
 				Scene->AddInterfaceObject(Light.get());
 	}
-	
+
 	if (Scene->GetDrawInsertPreview())
 	{
 		for (const lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
@@ -1372,7 +1372,7 @@ void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 			Piece->AddSubModelRenderMeshes(Scene, WorldMatrix, DefaultColorIndex, RenderMeshState, ParentActive);
 		}
 	}
-	
+
 	if (Scene->GetDrawInsertPreview())
 	{
 		for (const lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)

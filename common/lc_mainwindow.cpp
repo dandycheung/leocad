@@ -1368,31 +1368,31 @@ void lcMainWindow::ShowImageDialog()
 	lcImageDialogOptions Options;
 	Project* Project = lcGetActiveProject();
 	lcModel* Model = Project->GetActiveModel();
-	
+
 	Options.Width = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
 	Options.Height = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
 	Options.Start = Model->GetCurrentStep();
 	Options.End = Model->GetLastStep();
 	Options.FilePath = Project->GetImageFileName(false);
-	
+
 	lcImageDialog Dialog(this, &Options);
 
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
-	
+
 	lcSetProfileInt(LC_PROFILE_IMAGE_WIDTH, Options.Width);
 	lcSetProfileInt(LC_PROFILE_IMAGE_HEIGHT, Options.Height);
-	
+
 	lcGetActiveProject()->SaveImage(Options);
 }
 
 void lcMainWindow::ShowSelectDialog()
 {
 	lcModel* ActiveModel = GetActiveModel();
-	
+
 	if (!ActiveModel)
 		return;
-	
+
 	if (ActiveModel->GetPieces().empty() && ActiveModel->GetCameras().empty() && ActiveModel->GetLights().empty())
 	{
 		QMessageBox::information(this, tr("LeoCAD"), tr("Nothing to select."));
@@ -2489,7 +2489,7 @@ void lcMainWindow::ShowMergeDialog()
 	lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(LoadFileNames.first()).absolutePath());
 
 	std::vector<std::unique_ptr<Project>> ProjectsToMerge;
-	
+
 	for (const QString& LoadFileName : std::as_const(LoadFileNames))
 	{
 		std::unique_ptr<Project>& NewProject = ProjectsToMerge.emplace_back(std::make_unique<Project>());
@@ -2546,7 +2546,7 @@ void lcMainWindow::ImportInventory()
 
 	Project* NewProject = new Project();
 	std::vector<lcSetInventoryItem> SetInventory = Dialog.GetSetInventory();
-	
+
 	if (NewProject->ImportInventory(SetInventory, Dialog.GetSetName(), Dialog.GetSetDescription()))
 	{
 		gApplication->SetProject(NewProject);
@@ -2583,9 +2583,9 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 		QMessageBox::warning(this, tr("Save Project"), tr("Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead."));
 		return false;
 	}
-	
+
 	lcResult<void> SaveResult = Project->Save(SaveFileName);
-	
+
 	if (!SaveResult)
 	{
 		QMessageBox::warning(this, tr("Save Project"), SaveResult.error());

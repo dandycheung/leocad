@@ -508,7 +508,7 @@ lcResult<void> Project::Save(const QString& FileName)
 		SetFileName(FileName);
 		mModified = false;
 	}
-	
+
 	return lcResult<void>();
 }
 
@@ -743,7 +743,7 @@ lcResult<void> Project::ExportCurrentStep(const QString& FileName)
 	File.close();
 
 	lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(FileName).absolutePath());
-	
+
 	return lcResult<void>();
 }
 
@@ -757,7 +757,7 @@ lcResult<void> Project::ExportModel(const QString& FileName, lcModel* Model) con
 	QTextStream Stream(&File);
 
 	Model->SaveLDraw(Stream, false, 0);
-	
+
 	return lcResult<void>();
 }
 
@@ -1217,7 +1217,7 @@ lcResult<void> Project::Export3DStudio(const QString& FileName)
 	File.Seek(M3DStart + 2, SEEK_SET);
 	File.WriteU32(M3DEnd - M3DStart);
 	File.Seek(M3DEnd, SEEK_SET);
-	
+
 	return lcResult<void>();
 }
 
@@ -1501,7 +1501,7 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 	Stream << "</scene>\r\n";
 
 	Stream << "</COLLADA>\r\n";
-	
+
 	return lcResult<void>();
 }
 
@@ -1541,7 +1541,7 @@ lcResult<void> Project::ExportCSV(const QString& FileName)
 			CSVFile.WriteLine(Line);
 		}
 	}
-	
+
 	return lcResult<void>();
 }
 
@@ -1758,7 +1758,7 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 		Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"https://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
 	}
-	
+
 	return lcResult<void>();
 }
 
@@ -2444,7 +2444,7 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 		snprintf(Line, sizeof(Line), "\n#include \"%s\"\n", POVRayOptions.FooterIncludeFile.toLatin1().constData());
 		POVFile.WriteLine(Line);
 	}
-	
+
 	return lcResult<void>();
 }
 
@@ -2477,12 +2477,12 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 	OBJFile.WriteLine(Line);
 
 	lcDiskFile MaterialFile(MaterialFileName);
-	
+
 	if (!MaterialFile.Open(QIODevice::WriteOnly))
 		return lcUnexpected(tr("Could not open file '%1' for writing.").arg(MaterialFileName));
 
 	MaterialFile.WriteLine("# Colors used by LeoCAD\n\n");
-	
+
 	for (const lcColor& Color : gColorList)
 	{
 		if (Color.Translucent)
@@ -2546,7 +2546,7 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 			vert += Mesh->mNumVertices;
 		}
 	}
-	
+
 	return lcResult<void>();
 }
 

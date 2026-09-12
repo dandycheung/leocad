@@ -56,18 +56,18 @@ float lcParseValueLocalized(const QString& Value)
 
 int lcTerminateChildProcess(QWidget* Parent, const qint64 Pid, const qint64 Ppid)
 {
-	DWORD pID        = DWORD(Pid);
-	DWORD ppID       = DWORD(Ppid);
+	DWORD PID        = DWORD(Pid);
+	DWORD PPID       = DWORD(Ppid);
 	HANDLE hSnapshot = INVALID_HANDLE_VALUE, hProcess = INVALID_HANDLE_VALUE;
-	PROCESSENTRY32 pe32;
+	PROCESSENTRY32 PE32;
 
-	if ((hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, ppID)) == INVALID_HANDLE_VALUE)
+	if ((hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, PPID)) == INVALID_HANDLE_VALUE)
 	{
 		QMessageBox::warning(Parent, QObject::tr("Error"), QString("%1 failed: %1").arg("CreateToolhelp32Snapshot").arg(GetLastError()));
 		return -1;
 	}
-	pe32.dwSize = sizeof(PROCESSENTRY32);
-	if (Process32First(hSnapshot, &pe32) == FALSE)
+	PE32.dwSize = sizeof(PROCESSENTRY32);
+	if (Process32First(hSnapshot, &PE32) == FALSE)
 	{
 		QMessageBox::warning(Parent, QObject::tr("Error"), QString("%1 failed: %2").arg("Process32First").arg(GetLastError()));
 		CloseHandle(hSnapshot);
@@ -81,11 +81,11 @@ int lcTerminateChildProcess(QWidget* Parent, const qint64 Pid, const qint64 Ppid
 		QRegExp ExeExpression("^(?:cmd\\.exe|conhost\\.exe|blender\\.exe)$", Qt::CaseInsensitive);
 #endif
 
-		if (QString::fromWCharArray(pe32.szExeFile).contains(ExeExpression))
+		if (QString::fromWCharArray(PE32.szExeFile).contains(ExeExpression))
 		{
-			if ((pe32.th32ProcessID == pID && pe32.th32ParentProcessID == ppID) || pe32.th32ParentProcessID == pID)
+			if ((PE32.th32ProcessID == PID && PE32.th32ParentProcessID == PPID) || PE32.th32ParentProcessID == PID)
 			{
-				if ((hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pe32.th32ProcessID)) == INVALID_HANDLE_VALUE)
+				if ((hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, PE32.th32ProcessID)) == INVALID_HANDLE_VALUE)
 				{
 					QMessageBox::warning(Parent, QObject::tr("Error"), QObject::tr("%1 failed: %2").arg("OpenProcess").arg(GetLastError()));
 					return -3;
@@ -98,7 +98,7 @@ int lcTerminateChildProcess(QWidget* Parent, const qint64 Pid, const qint64 Ppid
 			}
 		}
 	}
-	while (Process32Next(hSnapshot, &pe32));
+	while (Process32Next(hSnapshot, &PE32));
 
 	CloseHandle(hSnapshot);
 
@@ -138,14 +138,14 @@ bool lcRunElevatedProcess(const LPCWSTR ExeName, const LPCWSTR Arguments, const 
 #endif
 
 // Resize all columns to content except for one stretching column. (taken from QT creator)
-lcTreeWidgetColumnStretcher::lcTreeWidgetColumnStretcher(QTreeWidget *treeWidget, int columnToStretch)
-	: QObject(treeWidget->header()), mColumnToStretch(columnToStretch), mInteractiveResize(false), mStretchWidth(0)
+lcTreeWidgetColumnStretcher::lcTreeWidgetColumnStretcher(QTreeWidget* TreeWidget, int ColumnToStretch)
+	: QObject(TreeWidget->header()), mColumnToStretch(ColumnToStretch), mInteractiveResize(false), mStretchWidth(0)
 {
 	parent()->installEventFilter(this);
-	connect(treeWidget->header(), &QHeaderView::sectionResized, this, &lcTreeWidgetColumnStretcher::SectionResized);
+	connect(TreeWidget->header(), &QHeaderView::sectionResized, this, &lcTreeWidgetColumnStretcher::SectionResized);
 
-	QHideEvent fake;
-	lcTreeWidgetColumnStretcher::eventFilter(parent(), &fake);
+	QHideEvent Fake;
+	lcTreeWidgetColumnStretcher::eventFilter(parent(), &Fake);
 }
 
 void lcTreeWidgetColumnStretcher::SectionResized(int LogicalIndex, int OldSize, int NewSize)
@@ -270,8 +270,8 @@ lcColorDialogPopup::lcColorDialogPopup(const QColor& InitialColor, QWidget* Pare
 	Layout->setContentsMargins(0, 0, 0, 0);
 
 	mColorDialog = new QColorDialog(InitialColor, this);
-    mColorDialog->setWindowFlags(Qt::Widget);
-    mColorDialog->setOptions(QColorDialog::DontUseNativeDialog | QColorDialog::NoButtons);
+	mColorDialog->setWindowFlags(Qt::Widget);
+	mColorDialog->setOptions(QColorDialog::DontUseNativeDialog | QColorDialog::NoButtons);
 
 	Layout->addWidget(mColorDialog);
 

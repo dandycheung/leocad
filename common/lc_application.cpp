@@ -191,7 +191,7 @@ lcApplication::lcApplication(int& Argc, char** Argv)
 
 	gApplication = this;
 	mDefaultStyle = style()->objectName();
-	
+
 	lcProfileInit();
 
 	mPreferences.LoadDefaults();
@@ -1158,7 +1158,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				FileName = FileName.left(FileName.length() - Extension.length() - 1);
 				FileName += ".obj";
 			}
-			
+
 			lcResult<void> ExportResult = mProject->ExportWavefront(FileName);
 
 			if (ExportResult)
@@ -1187,9 +1187,9 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				FileName = FileName.left(FileName.length() - Extension.length() - 1);
 				FileName += ".3ds";
 			}
-			
+
 			lcResult<void> ExportResult = mProject->Export3DStudio(FileName);
-			
+
 			if (ExportResult)
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
 			else if (!ExportResult.error().isEmpty())
@@ -1216,7 +1216,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				FileName = FileName.left(FileName.length() - Extension.length() - 1);
 				FileName += ".dae";
 			}
-			
+
 			lcResult<void> ExportResult = mProject->ExportCOLLADA(FileName);
 
 			if (ExportResult)
@@ -1245,9 +1245,9 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				FileName = FileName.left(FileName.length() - Extension.length() - 1);
 				FileName += ".csv";
 			}
-			
+
 			lcResult<void> ExportResult = mProject->ExportCSV(FileName);
-			
+
 			if (ExportResult)
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
 			else if (!ExportResult.error().isEmpty())
@@ -1262,7 +1262,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				HTMLOptions.PathName = Options.SaveHTMLName;
 
 			lcResult<void> ExportResult = mProject->ExportHTML(HTMLOptions);
-			
+
 			if (ExportResult)
 				StdOut << tr("Saved '%1'.\n").arg(HTMLOptions.PathName);
 			else if (!ExportResult.error().isEmpty())
@@ -1274,7 +1274,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 	{
 		gMainWindow->SetColorIndex(lcGetColorIndex(7));
 		gMainWindow->GetPartSelectionWidget()->SetDefaultPart();
-		
+
 #ifdef Q_OS_IOS
 		if (!lcContext::InitializeRenderer())
 		{
@@ -1282,7 +1282,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			return lcStartupMode::Error;
 		}
 #endif
-		
+
 		gMainWindow->show();
 
 #ifdef Q_OS_WIN
