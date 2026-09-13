@@ -1040,7 +1040,7 @@ inline bool lcMatrix33Similar(const lcMatrix33& a, const lcMatrix33& b)
 	{
 		float Dot = lcDot(a.r[Row], b.r[Row]);
 
-		if (Dot < 0.99f || Dot > 1.01f)
+		if (Dot < 0.9999f || Dot > 1.0001f)
 			return false;
 	}
 
