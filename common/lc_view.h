@@ -71,7 +71,7 @@ enum class lcTrackTool
 	RotateX,
 	RotateY,
 	RotateZ,
-	RotateXYZ,
+	RotateTrackBall,
 	RotateCamera,
 	RotateTrainTrackRight,
 	RotateTrainTrackLeft,
@@ -331,6 +331,7 @@ protected:
 	void OnButtonDown(lcTrackButton TrackButton);
 	void StartPan(int x, int y);
 	void UpdatePan(int x, int y);
+	lcVector3 GetTrackballPoint(int x, int y) const;
 
 	void ShowTrainTrackPopup();
 
@@ -346,6 +347,12 @@ protected:
 	float mCameraRotationMouseAngle = 0.0f;
 	float mCameraRotationLastMouseAngle = 0.0f;
 	float mCameraRotationAngle = 0.0f;
+	lcVector3 mTrackballCenter;
+	lcVector3 mTrackballVector;
+	float mTrackballRadius = 1.0f;
+	lcMatrix33 mTrackballPendingRotation = lcMatrix33Identity();
+	bool mTrackballSnapping = false;
+	bool mTrackballHasPendingRotation = false;
 	Qt::KeyboardModifiers mMouseModifiers = Qt::NoModifier;
 
 	bool mTrackUpdated = false;

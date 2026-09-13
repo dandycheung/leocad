@@ -1660,7 +1660,7 @@ lcTrackTool lcView::GetOverrideTrackTool(Qt::MouseButton Button) const
 		lcTrackTool::Camera,           // lcTool::Camera
 	    lcTrackTool::Select,           // lcTool::Select
 	    lcTrackTool::MoveXYZ,          // lcTool::Move
-	    lcTrackTool::RotateXYZ,        // lcTool::Rotate
+	    lcTrackTool::RotateTrackBall,  // lcTool::Rotate
 	    lcTrackTool::Eraser,           // lcTool::Eraser
 	    lcTrackTool::Paint,            // lcTool::Paint
 	    lcTrackTool::ColorPicker,      // lcTool::ColorPicker
@@ -1941,7 +1941,7 @@ lcCursor lcView::GetCursor() const
 		lcCursor::Rotate,           // lcTrackTool::RotateX
 		lcCursor::Rotate,           // lcTrackTool::RotateY
 		lcCursor::Rotate,           // lcTrackTool::RotateZ
-		lcCursor::Default,          // lcTrackTool::RotateXYZ
+		lcCursor::Default,          // lcTrackTool::RotateTrackBall
 		lcCursor::Rotate,           // lcTrackTool::RotateCamera
 		lcCursor::Select,           // lcTrackTool::RotateTrainTrackRight
 		lcCursor::Select,           // lcTrackTool::RotateTrainTrackLeft
@@ -2059,7 +2059,7 @@ lcTool lcView::GetCurrentTool() const
 		lcTool::Rotate,           // lcTrackTool::RotateX
 		lcTool::Rotate,           // lcTrackTool::RotateY
 		lcTool::Rotate,           // lcTrackTool::RotateZ
-		lcTool::Rotate,           // lcTrackTool::RotateXYZ
+		lcTool::Rotate,           // lcTrackTool::RotateTrackBall
 		lcTool::Rotate,           // lcTrackTool::RotateCamera
 		lcTool::Rotate,           // lcTrackTool::RotateTrainTrackRight
 		lcTool::Rotate,           // lcTrackTool::RotateTrainTrackLeft
@@ -2158,7 +2158,7 @@ void lcView::UpdateTrackTool()
 	case lcTool::Rotate:
 		{
 			NewTrackTool = mViewManipulator->UpdateRotate();
-			mTrackToolFromOverlay = NewTrackTool != lcTrackTool::RotateXYZ;
+			mTrackToolFromOverlay = NewTrackTool != lcTrackTool::RotateTrackBall;
 			Redraw = NewTrackTool != mTrackTool;
 		}
 		break;
@@ -2335,6 +2335,16 @@ void lcView::EndPanGesture(bool Accept)
 	ActiveModel->EndMouseTool(lcTool::Pan, this, Accept);
 }
 
+lcVector3 lcView::GetTrackballPoint(int x, int y) const
+{
+	const float PointX = ((float)x - mTrackballCenter[0]) / mTrackballRadius;
+	const float PointY = ((float)y - mTrackballCenter[1]) / mTrackballRadius;
+	const float LengthSquared = PointX * PointX + PointY * PointY;
+	const float PointZ = LengthSquared <= 0.5f ? sqrtf(1.0f - LengthSquared) : 0.5f / sqrtf(LengthSquared);
+
+	return lcNormalize(lcVector3(PointX, PointY, PointZ));
+}
+
 void lcView::StartTracking(lcTrackButton TrackButton)
 {
 	mTrackButton = TrackButton;
@@ -2376,6 +2386,27 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 
 			    mCameraRotationMouseAngle = atan2f((float)mMouseY - ScreenCenter[1], (float)mMouseX - ScreenCenter[0]);
 				mCameraRotationLastMouseAngle = mCameraRotationMouseAngle;
+			}
+
+			if (mTrackTool == lcTrackTool::RotateTrackBall)
+			{
+				lcVector3 OverlayCenter;
+				lcMatrix33 RelativeRotation;
+				ActiveModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation);
+
+				lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
+				if (ActiveModel != mModel)
+					WorldMatrix = lcMul(WorldMatrix, mActiveSubmodelTransform);
+
+				mTrackballCenter = ProjectPoint(WorldMatrix.GetTranslation());
+				const lcMatrix44 CameraWorldMatrix = lcMatrix44AffineInverse(mCamera->mWorldView);
+				const lcVector3 CameraRight = lcNormalize(lcMul30(lcVector3(1.0f, 0.0f, 0.0f), CameraWorldMatrix));
+				const lcVector3 RadiusPoint = ProjectPoint(WorldMatrix.GetTranslation() + CameraRight * (2.0f * GetOverlayScale()));
+				mTrackballRadius = lcMax(1.0f, lcLength(RadiusPoint - mTrackballCenter));
+				mTrackballVector = GetTrackballPoint(mMouseX, mMouseY);
+				mTrackballPendingRotation = lcMatrix33Identity();
+				mTrackballSnapping = gMainWindow->GetAngleSnap() != 0.0f;
+				mTrackballHasPendingRotation = false;
 			}
 			break;
 
@@ -2602,7 +2633,7 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 	case lcTrackTool::RotateX:
 	case lcTrackTool::RotateY:
 	case lcTrackTool::RotateZ:
-	case lcTrackTool::RotateXYZ:
+	case lcTrackTool::RotateTrackBall:
 	case lcTrackTool::RotateCamera:
 		if (ActiveModel->CanRotateSelection())
 			StartTracking(TrackButton);
@@ -3081,11 +3112,54 @@ void lcView::OnMouseMove()
 		}
 		break;
 
-	case lcTrackTool::RotateXYZ:
+	case lcTrackTool::RotateTrackBall:
 		{
-			lcVector3 ScreenZ = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
+			const lcVector3 CurrentVector = GetTrackballPoint(mMouseX, mMouseY);
+			const lcVector3 LocalAxis = lcCross(mTrackballVector, CurrentVector);
+			const float AxisLength = lcLength(LocalAxis);
 
-			ActiveModel->UpdateRotateTool(36.0f * (float)(mMouseY - mMouseDownY) * MouseSensitivity * ScreenZ, mTrackButton != lcTrackButton::Left);
+			if (AxisLength > 0.0001f)
+			{
+				const float Angle = atan2f(AxisLength, lcClamp(lcDot(mTrackballVector, CurrentVector), -1.0f, 1.0f));
+				const lcMatrix44 CameraWorldMatrix = lcMatrix44AffineInverse(mCamera->mWorldView);
+				lcVector3 RotationAxis = lcNormalize(lcMul30(LocalAxis, CameraWorldMatrix));
+				if (ActiveModel != mModel)
+					RotationAxis = lcNormalize(lcMul30(RotationAxis, lcMatrix44AffineInverse(mActiveSubmodelTransform)));
+				const lcMatrix33 IncrementalRotation = lcMatrix33FromAxisAngle(RotationAxis, Angle);
+
+				const bool Snapping = gMainWindow->GetAngleSnap() != 0.0f;
+				if (Snapping != mTrackballSnapping)
+				{
+					if (!Snapping && mTrackballHasPendingRotation)
+						ActiveModel->UpdateRotateTool(mTrackballPendingRotation, mTrackButton != lcTrackButton::Left, false);
+
+					mTrackballPendingRotation = lcMatrix33Identity();
+					mTrackballSnapping = Snapping;
+					mTrackballHasPendingRotation = false;
+				}
+
+				if (!Snapping)
+				{
+					ActiveModel->UpdateRotateTool(IncrementalRotation, mTrackButton != lcTrackButton::Left, false);
+				}
+				else
+				{
+					mTrackballPendingRotation = lcMul(mTrackballPendingRotation, IncrementalRotation);
+					mTrackballHasPendingRotation = true;
+					const lcVector4 AxisAngle = lcMatrix44ToAxisAngle(lcMatrix44(mTrackballPendingRotation, lcVector3(0.0f, 0.0f, 0.0f)));
+					const float SnappedAngle = ActiveModel->SnapRotation(lcVector3(AxisAngle[3] * LC_RTOD, 0.0f, 0.0f))[0];
+
+					if (SnappedAngle != 0.0f)
+					{
+						const lcMatrix33 SnappedRotation = lcMatrix33FromAxisAngle(lcVector3(AxisAngle), SnappedAngle * LC_DTOR);
+						ActiveModel->UpdateRotateTool(SnappedRotation, mTrackButton != lcTrackButton::Left, false);
+						mTrackballPendingRotation = lcMul(lcMatrix33AffineInverse(SnappedRotation), mTrackballPendingRotation);
+						mTrackballHasPendingRotation = lcMatrix44ToAxisAngle(lcMatrix44(mTrackballPendingRotation, lcVector3(0.0f, 0.0f, 0.0f)))[3] > 0.000001f;
+					}
+				}
+			}
+
+			mTrackballVector = CurrentVector;
 		}
 		break;
 
@@ -3113,8 +3187,10 @@ void lcView::OnMouseMove()
 			mCameraRotationAngle += Angle;
 			mCameraRotationLastMouseAngle = MouseAngle;
 
-			const lcVector3 CameraAxis = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
-			ActiveModel->UpdateRotateTool(CameraAxis, mCameraRotationAngle * LC_RTOD, mTrackButton != lcTrackButton::Left, false);
+				lcVector3 CameraAxis = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
+				if (ActiveModel != mModel)
+					CameraAxis = lcNormalize(lcMul30(CameraAxis, lcMatrix44AffineInverse(mActiveSubmodelTransform)));
+				ActiveModel->UpdateRotateTool(CameraAxis, mCameraRotationAngle * LC_RTOD, mTrackButton != lcTrackButton::Left, false);
 		}
 		break;
 

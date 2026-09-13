@@ -5167,15 +5167,6 @@ void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTra
 	}
 }
 
-void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag)
-{
-	const lcVector3 Delta = SnapRotation(Angles) - SnapRotation(mMouseToolDistance);
-	RotateSelectedObjects(Delta, lcModelTransformFlag::Relative | (AlternateButtonDrag ? lcModelTransformFlag::RotatePivotPoint : lcModelTransformFlag::None), lcModelHistoryEditMerge::None);
-
-	mMouseToolDistance = Angles;
-	mMouseToolFirstMove = false;
-}
-
 void lcModel::UpdateRotateTool(const lcVector3& Axis, float Angle, bool AlternateButtonDrag, bool Relative)
 {
 	const lcVector3 Angles(Angle, Angle, Angle);
@@ -5185,6 +5176,12 @@ void lcModel::UpdateRotateTool(const lcVector3& Axis, float Angle, bool Alternat
 		RotateSelectedObjects(lcMatrix33FromAxisAngle(Axis, Delta * LC_DTOR), (Relative ? lcModelTransformFlag::Relative : lcModelTransformFlag::None) | (AlternateButtonDrag ? lcModelTransformFlag::RotatePivotPoint : lcModelTransformFlag::None), lcModelHistoryEditMerge::None);
 
 	mMouseToolDistance = Angles;
+	mMouseToolFirstMove = false;
+}
+
+void lcModel::UpdateRotateTool(const lcMatrix33& RotationMatrix, bool AlternateButtonDrag, bool Relative)
+{
+	RotateSelectedObjects(RotationMatrix, (Relative ? lcModelTransformFlag::Relative : lcModelTransformFlag::None) | (AlternateButtonDrag ? lcModelTransformFlag::RotatePivotPoint : lcModelTransformFlag::None), lcModelHistoryEditMerge::None);
 	mMouseToolFirstMove = false;
 }
 

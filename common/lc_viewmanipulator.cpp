@@ -1034,7 +1034,7 @@ bool lcViewManipulator::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 Allowe
 		case lcTrackTool::RotateZ:
 			return AllowedTransforms & LC_OBJECT_TRANSFORM_ROTATE_Z;
 
-		case lcTrackTool::RotateXYZ:
+		case lcTrackTool::RotateTrackBall:
 			return (AllowedTransforms & (LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z)) == (LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z);
 
 		case lcTrackTool::RotateCamera:
@@ -1347,7 +1347,7 @@ lcTrackTool lcViewManipulator::UpdateRotate()
 	lcMatrix33 RelativeRotation;
 
 	if (!ActiveModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation))
-		return lcTrackTool::RotateXYZ;
+		return lcTrackTool::RotateTrackBall;
 
 	lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
 
@@ -1364,7 +1364,7 @@ lcTrackTool lcViewManipulator::UpdateRotate()
 
 	if (lcSphereRayIntersection(OverlayCenter, OverlayRotateRadius * OverlayScale, StartEnd[0], StartEnd[1], Intersection))
 	{
-		const lcVector3 LocalIntersection = lcMul(Intersection - OverlayCenter, lcMatrix33AffineInverse(RelativeRotation));
+		const lcVector3 LocalIntersection = lcMul(Intersection - OverlayCenter, lcMatrix33AffineInverse(lcMatrix33(WorldMatrix)));
 		const float Epsilon = 0.25f * OverlayScale;
 		const float dx = fabsf(LocalIntersection[0]);
 		const float dy = fabsf(LocalIntersection[1]);
@@ -1414,5 +1414,5 @@ lcTrackTool lcViewManipulator::UpdateRotate()
 			return lcTrackTool::RotateCamera;
 	}
 
-	return lcTrackTool::RotateXYZ;
+	return lcTrackTool::RotateTrackBall;
 }
